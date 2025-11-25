@@ -1,0 +1,29 @@
+tener instalado node.js
+
+frontend/
+│── app/
+│   │── layout.js
+│   │── page.js
+│   │── globals.css
+│   │── api/
+│   │   └── backend.js        # Cliente fetch hacia FastAPI
+│   │
+│   ├── components/
+│   │   ├── MapView.jsx       # Mapa interactivo
+│   │   ├── Sidebar.jsx       # Panel con datos del cantón
+│   │   ├── Card.jsx          # Componente visual reutilizable
+│   │   └── Loading.jsx
+│   │
+│   ├── lib/
+│   │   └── format.js         # Funciones auxiliares para números, %
+│   │
+│   └── styles/
+│       └── map.css           # Estilos específicos del mapa
+│
+│── public/
+│   ├── logo.png
+│   └── favicon.ico
+│
+│── package.json
+│── next.config.js
+│── README.md

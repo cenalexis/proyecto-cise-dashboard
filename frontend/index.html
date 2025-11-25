@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Loja – Cantones</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #fafafa;
+        }
+
+        #container {
+            display: grid;
+            grid-template-columns: 55% 45%;
+            height: 100vh;
+        }
+
+        /* --- MAPA --- */
+        #map {
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+        }
+
+        /* --- PANEL DE INDICADORES --- */
+        #panel {
+            padding: 25px;
+            overflow-y: auto;
+            background: #f4f4f4;
+            border-left: 2px solid #ddd;
+        }
+
+        .kpi {
+            background: white;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+
+        .kpi h3 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+        }
+
+        #selected-canton {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+    </style>
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+
+<body>
+
+<div id="container">
+    <div id="map"></div>
+
+    <div id="panel">
+        <div id="selected-canton">Seleccione un cantón</div>
+
+        <div class="kpi" id="kpi-desempleo"></div>
+        <div class="kpi" id="kpi-empleo"></div>
+        <div class="kpi" id="kpi-pea"></div>
+        <div class="kpi" id="kpi-pob"></div>
+        <div class="kpi" id="kpi-seguro"></div>
+    </div>
+</div>
+
+<script>
+    let geoData = null;
+    let aggData = null;
+    let map;
+
+    // -------------------------------
+    // 1) CARGAR BACKEND
+    // -------------------------------
+    async function loadData() {
+        geoData = await fetch("http://127.0.0.1:8000/geo").then(r => r.json());
+        aggData = await fetch("http://127.0.0.1:8000/agg").then(r => r.json());
+        drawMap();
+    }
+
+    // -------------------------------
+    // 2) CREAR MAPA
+    // -------------------------------
+    function drawMap() {
+        map = L.map('map').setView([-3.99, -79.20], 8);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+
+        // No coloreado = estilo transparente
+        let geoLayer = L.geoJSON(geoData, {
+            style: {
+                color: "#000000",
+                weight: 1,
+                fillOpacity: 0
+            },
+            onEachFeature: function (feature, layer) {
+                const cantonCode = feature.properties.DPA_CANTON;
+
+                // Click -> filtrar KPIs
+                layer.on('click', () => {
+                    const c = getCantonName(cantonCode);
+                    showKPIs(c);
+                });
+            }
+        });
+
+        geoLayer.addTo(map);
+    }
+
+    // -------------------------------
+    // 3) BUSCAR NOMBRE CANTÓN
+    // -------------------------------
+    function getCantonName(cod) {
+        let row = aggData.find(x => x.canton_code === cod || x.DPA_CANTON === cod);
+        if (row) return row.canton;
+        return "Cantón sin nombre";
+    }
+
+    // -------------------------------
+    // 4) MOSTRAR KPIs
+    // -------------------------------
+    function showKPIs(cantonName) {
+        const row = aggData.find(x => x.canton === cantonName);
+        if (!row) return;
+
+        document.getElementById("selected-canton").innerText = cantonName;
+
+        document.getElementById("kpi-desempleo").innerHTML =
+            `<h3>Desempleo (%)</h3> ${row.desempleo}`;
+        document.getElementById("kpi-empleo").innerHTML =
+            `<h3>Empleo (%)</h3> ${row.empleo}`;
+        document.getElementById("kpi-pea").innerHTML =
+            `<h3>PEA</h3> ${row.pea}`;
+        document.getElementById("kpi-pob").innerHTML =
+            `<h3>Población</h3> ${row.pob}`;
+        document.getElementById("kpi-seguro").innerHTML =
+            `<h3>Seguro social (%)</h3> ${row.seguro_social}`;
+    }
+
+    // -------------------------------
+    loadData();
+</script>
+
+</body>
+</html>
