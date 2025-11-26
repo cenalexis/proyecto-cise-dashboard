@@ -7,8 +7,8 @@ import PieChart from "@/components/PieChart";
 import IncidenciaChart from "@/components/IncidenciaChart";
 import DualMetricCard from "@/components/DualMetricCard";
 import { fetchGeo, fetchAgg, fetchDF } from "./api/backend";
-import { FaUsers, FaUserTie, FaHome } from "react-icons/fa";
-import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Cell} from "recharts";
+import { FaUsers, FaUserTie, FaHome, FaMoneyBillAlt } from "react-icons/fa";
+import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, Cell, LabelList, Customized } from "recharts";
 
 
 export default function Home() {
@@ -104,6 +104,14 @@ export default function Home() {
     ).toFixed(2)
   : null;
 
+      //crear media de hacinamiento para el valor provincial
+    const avghacinamiento = agg.length
+  ? (
+      agg
+        .map((r) => parseFloat(r["hacinamiento%"]) || 0)
+        .reduce((a, b) => a + b, 0) / agg.length
+    ).toFixed(2)
+  : null;
   //media para la zona
   const totalUrbana = agg.length
   ? agg.reduce((acc, d) => acc + Number(d.urb || 0), 0) / agg.length
@@ -125,7 +133,7 @@ export default function Home() {
   return (
     <div className="p-6 h-screen flex flex-col gap-4">
       {/* KPIs row */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-4 gap-4">
         <KPICard
           icon={<FaUsers />}
           title="Población muestral"
@@ -166,22 +174,56 @@ export default function Home() {
 
         <KPICard
           icon={<FaUserTie />}
-          title="Desempleo o empleo inadecuado"
+          title="Desempleo + empleo inadecuado"
           value={
             selAgg 
             ? parseFloat(selAgg["tdesem"]).toFixed(2)
             : totalDesempleoProv }
           suffix="%"
-        />
-        <KPICard
-          icon={<FaHome />}
-          title="Déficit Habitacional"
-          value={
-            selAgg 
-            ? parseFloat(selAgg["deficit_hab%"]).toFixed(2)
-            : avgDeficitHab }
-          suffix="%"
-        />
+          >
+<span style={{
+    fontSize: "0.75rem",   // letras pequeñas
+    color: "black",     // negro
+  }}>
+    Componente del IPM
+  </span>
+          </KPICard>
+       
+<KPICard
+  icon={<FaHome />}
+  title="Déficit Habitacional"
+  value={
+    selAgg 
+      ? parseFloat(selAgg["deficit_hab%"]).toFixed(2)
+      : avgDeficitHab
+  }
+  suffix="%"
+>
+  <span style={{
+    fontSize: "0.75rem",   // letras pequeñas
+    color: "black",     // negro
+  }}>
+    Estado de piso, paredes y techo 
+  </span>
+</KPICard>
+
+<KPICard
+  icon={<FaHome />}
+  title="Hacinamiento"
+  value={
+    selAgg 
+      ? parseFloat(selAgg["hacinamiento%"]).toFixed(2)
+      : avghacinamiento
+  }
+  suffix="%"
+>
+  <span style={{
+    fontSize: "0.75rem",   // letras pequeñas
+    color: "black",     // negro
+  }}>
+    Hogares con más de 3 personas por dormitorio
+  </span>
+</KPICard>
       </div>
 
       {/* Main body: map left, center and right columns */}
@@ -335,11 +377,14 @@ export default function Home() {
                     return (
                       <Cell
                         key={index}
-                        fill={isSelected ? "#6D28D9" : "#C4B5FD"}
+                        fill={isSelected 
+                          ? "#0074D9" 
+                          : "#6D28D9"}
                         opacity={selectedName && !isSelected ? 0.35 : 1}
                       />
                     );
                   })}
+                  <LabelList dataKey={metricKey} position="top" fill ="#333" fontSize={11} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -393,7 +438,7 @@ export default function Home() {
         <div className="flex gap-2">
           <div className="flex-1 bg-gray-50 rounded p-3 text-center shadow-sm">
             <Baby className="mx-auto text-ciseViolet mb-1" size={22} />
-            Niños y adolescentes que no asisten a clases
+            Hogares con niños y adolescentes que no asisten a clases
             <br />
             <span className="text-2xl font-bold text-ciseViolet">
               {fmt(noAsiste)}
@@ -414,8 +459,8 @@ export default function Home() {
           </div>
 
           <div className="flex-1 bg-gray-50 rounded p-3 text-center shadow-sm">
-            <Ban className="mx-auto text-ciseViolet mb-1" size={22} />
-            Hogares que no asisten a la educación superior por falta de recursos
+            <FaMoneyBillAlt className="mx-auto text-ciseViolet mb-1" size={22} />
+            Hogares con miembros que no asisten a la educación superior por falta de recursos
             <br />
             <span className="text-2xl font-bold text-ciseViolet">
               {fmt(noRecursos)}
