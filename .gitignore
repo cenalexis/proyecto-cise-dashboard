@@ -11,4 +11,5 @@ yarn-debug.log*
 yarn-error.log*
 
 # Sistema
-.DS_Store
+.DS_Storenode_modules/
+.next/
