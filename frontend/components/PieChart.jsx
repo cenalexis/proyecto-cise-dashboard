@@ -12,9 +12,9 @@ export default function PieChart({ dataObj, title }) {
 
   const palette = [
     "#6f42c1", // Violeta principal (CISE)
-    "#3b82f6", // Fondo lavanda pastel
-    "#10b981", // Acento cálido (ámbar)
-    "#e5e7eb", // Acento verde (éxito)
+    "#f3e8ff", // Fondo lavanda pastel
+    "#f59e0b", // Acento cálido (ámbar)
+    "#10b981", // Acento verde (éxito)
     "#f43f5e", // Acento rojo (alerta)
     "#64748b", // Neutro gris azulado
   ];

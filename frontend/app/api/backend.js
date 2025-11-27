@@ -43,4 +43,3 @@ export async function fetchAggById(dpa) {
     (row) => String(row.DPA_CANTON).trim() === String(dpa).trim()
   );
 }
-
